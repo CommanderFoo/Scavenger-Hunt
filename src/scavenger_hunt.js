@@ -6,13 +6,56 @@ TODO:
 LATER: Focus on "What's it gonna be?!" mechanics -- containers explode when clicked
 */
 
+function show_leaderboard(){
+	var html = "";
+	var leaderboard = pb.plugin.key('sh_leaderboard').get();
+	var $content = $("#content");
+	var html_decode = str => {
+
+		return str.toString().replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+	};
+
+	html += "<div class=\"scavenger-hunt-leaderboard container\">";
+	html += "<div class=\"title-bar\"><h2>Scavenger Hunt Leaderboard</h2></div>";
+	html += "<div class=\"content pad-all\">";
+
+	if(Array.isArray(leaderboard) && leaderboard.length > 0){
+		leaderboard.sort((a, b) => {
+			if(a.count > b.count){
+				return -1;
+			}
+			if(a.count < b.count){
+				return 1;
+			}
+			return 0;
+		});
+
+		for(var i = 0; i < leaderboard.length; ++ i){
+			html += "<div class='scavenger-hunt-leaderboard-item'><strong>" + pb.text.escape_html(leaderboard[i].count) + "</strong> <a href='/user/" + parseInt(leaderboard[i].id, 10) + "'>" + pb.text.escape_html(html_decode(leaderboard[i].name)) + "</a></div>";
+		}
+	} else {
+		html += "Leaderboard is currently empty.";
+	}
+
+	html += "</div></div>";
+
+	$content.append(html);
+}
+
 $(document).ready(function() {
 
 	var halloweenFeatures = pb.plugin.get('scavenger_hunt').settings.halloween_features;
 	var userID = parseInt(pb.data('user').id, 10);
 	var userName = pb.data('user').username;
 	var userprizeBag = pb.plugin.key('sh_obj_amount').get(userID);
-	var leaderBoard = pb.plugin.key('sh_leaderboard').get();
+	var root = pb.data("route");
+
+	// Show leaderboard on a new page with an id of "scavenger-hunt"
+
+	if(root && root.params && root.params.page_id == "scavenger-hunt"){
+		show_leaderboard();
+	}
 
 	if (userprizeBag === null) {
 		userprizeBag = 0
@@ -124,6 +167,34 @@ $(document).ready(function() {
 			}
 
 			incrementNum = parseInt(incrementNum) || 1;
+
+			var leaderboard = pb.plugin.key('sh_leaderboard').get();
+
+			if(!Array.isArray(leaderboard)){
+				leaderboard = [];
+			}
+
+			var has_user = false;
+
+			for(i = 0; i < leaderboard.length; ++i) {
+				if(leaderboard[i].id == userID) {
+					leaderboard[i].count = dbCheck;
+					has_user = true;
+					break;
+				}
+			}
+
+			if(!has_user){
+				leaderboard.push({
+					name: pb.data('user').name,
+					id: userID,
+					count: dbCheck
+				});
+			}
+
+			pb.plugin.key('sh_leaderboard').set({
+				value: leaderboard
+			});
 
 			proboards.alert(pb.plugin.get('scavenger_hunt').settings.object_name + " found!", "<img style='float:left; padding:15px; padding-right:20px;' src='" + pb.plugin.get('scavenger_hunt').settings.chest_image + "'><span style>" + pb.plugin.get('scavenger_hunt').settings.win_text + "<br><br><center><b>+" + incrementNum + " " + pb.plugin.get('scavenger_hunt').settings.prize_name_plural + "!<br>" + dbCheck + " " + pb.plugin.get('scavenger_hunt').settings.prize_name_plural + " in your " + pb.plugin.get('scavenger_hunt').settings.container_name + " now!</b></center></span>");
 			$('.prizeDetector').removeClass('active').attr('src', pb.plugin.get('scavenger_hunt').settings.prize_detector_deactivated_image);
