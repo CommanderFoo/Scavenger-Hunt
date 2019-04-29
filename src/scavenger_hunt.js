@@ -10,7 +10,7 @@ function show_leaderboard(){
 	var html = "";
 	var leaderboard = pb.plugin.key('sh_leaderboard').get();
 	var $content = $("#content");
-	var html_decode = str => {
+	var html_decode = function(str){
 
 		return str.toString().replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
@@ -21,7 +21,7 @@ function show_leaderboard(){
 	html += "<div class=\"content pad-all\">";
 
 	if(Array.isArray(leaderboard) && leaderboard.length > 0){
-		leaderboard.sort((a, b) => {
+		leaderboard.sort(function(a, b){
 			if(a.count > b.count){
 				return -1;
 			}
