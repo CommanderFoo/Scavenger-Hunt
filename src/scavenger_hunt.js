@@ -43,17 +43,64 @@ function show_leaderboard(){
 	$content.append(html);
 }
 
+function add_profile_staff_clear_button(route){
+	if(!pb.data("user").is_logged_in || !pb.data("user").is_staff){
+		return;
+	} 
+	
+	if(route.name == "user"){
+		var user_id = parseInt(route.params.user_id, 10);
+		var button = $('<a class="button scavenger-hunt-clear" href="#" role="button">Clear Scavenger Hunt Data</a>');
+		
+		button.on("click", function(){
+			
+			pb.plugin.key("sh_obj_amount").set({
+				
+				object_id: user_id,
+				value: 0
+				
+			});
+		
+			var leaderboard = pb.plugin.key("sh_leaderboard").get() || [];
+			var has_user = false;
+
+			for(i = 0; i < leaderboard.length; ++i) {
+				if(leaderboard[i].id == user_id) {
+					leaderboard.splice(i, 1);
+					
+					break;
+				}
+			}
+			
+			pb.plugin.key("sh_leaderboard").set({
+			
+				value: leaderboard
+				
+			});
+			
+			pb.window.alert("Scavenger Data", "Scavenger data cleared");
+			
+			return false;
+			
+		});
+		
+		$(".controls").prepend(button);
+	}
+}
+
 $(document).ready(function() {
 
 	var halloweenFeatures = pb.plugin.get('scavenger_hunt').settings.halloween_features;
 	var userID = parseInt(pb.data('user').id, 10);
 	var userName = pb.data('user').username;
 	var userprizeBag = pb.plugin.key('sh_obj_amount').get(userID);
-	var root = pb.data("route");
+	var route = pb.data("route");
 
+	add_profile_staff_clear_button(route, userID);
+	
 	// Show leaderboard on a new page with an id of "scavenger-hunt"
 
-	if(root && root.params && root.params.page_id == "scavenger-hunt"){
+	if(route && route.params && route.params.page_id == "scavenger-hunt"){
 		show_leaderboard();
 	}
 
