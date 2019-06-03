@@ -195,7 +195,7 @@ $(document).ready(function() {
 
 				pb.plugin.key('sh_obj_amount').increment({
 					object_id: userID,
-					value: incrementNum
+					value: parseInt(incrementNum) || 1
 				});
 			} else {
 				pb.plugin.key('sh_obj_amount').set({
