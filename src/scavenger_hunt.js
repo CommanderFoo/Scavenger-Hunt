@@ -50,37 +50,59 @@ function add_profile_staff_clear_button(route){
 	if(route.name == "user"){
 		var user_id = parseInt(route.params.user_id, 10);
 		var button = $('<a class="button scavenger-hunt-clear" href="#" role="button">Clear Scavenger Hunt Data</a>');
+		var $dialog = $("<div id='scavenger-hunt-clear-dialog' style='display: none'>Are you sure you want clear this users scavenger count (including leaderboard entry)?</div>");
+		
+		$dialog.appendTo($("body"));
 		
 		button.on("click", function(){
 			
-			pb.plugin.key("sh_obj_amount").set({
+			$dialog.dialog({
+			
+				title: "Confirm",
+				modal: true,
+				autoOpen: true,
+				height: 200,
+				width: 350,
+				buttons: {
 				
-				object_id: user_id,
-				value: 0
-				
-			});
-		
-			var leaderboard = pb.plugin.key("sh_leaderboard").get() || [];
-			var has_user = false;
-
-			for(i = 0; i < leaderboard.length; ++i) {
-				if(leaderboard[i].id == user_id) {
-					leaderboard.splice(i, 1);
+					"Clear Data": function(){
+						pb.plugin.key("sh_obj_amount").set({
 					
-					break;
-				}
-			}
-			
-			pb.plugin.key("sh_leaderboard").set({
-			
-				value: leaderboard
+							object_id: user_id,
+							value: 0
+							
+						});
+					
+						var leaderboard = pb.plugin.key("sh_leaderboard").get() || [];
+						var has_user = false;
+
+						for(i = 0; i < leaderboard.length; ++i) {
+							if(leaderboard[i].id == user_id) {
+								leaderboard.splice(i, 1);
+								
+								break;
+							}
+						}
+						
+						pb.plugin.key("sh_leaderboard").set({
+						
+							value: leaderboard
+							
+						});
+						
+						$dialog.dialog("close");
+						pb.window.alert("Scavenger Data", "Scavenger data cleared");
+					},
+					
+					"Cancel": function(){
+						$dialog.dialog("close");
+					}			
 				
-			});
+				}
 			
-			pb.window.alert("Scavenger Data", "Scavenger data cleared");
+			});
 			
 			return false;
-			
 		});
 		
 		$(".controls").prepend(button);
