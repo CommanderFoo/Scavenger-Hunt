@@ -2,7 +2,6 @@
 TODO: 
 - Make the totals show in full profiles
 - Make the small prize img use a scaled-down version of the large img
-
 LATER: Focus on "What's it gonna be?!" mechanics -- containers explode when clicked
 */
 
@@ -32,7 +31,7 @@ function show_leaderboard(){
 		});
 
 		for(var i = 0; i < leaderboard.length; ++ i){
-			html += "<div class='scavenger-hunt-leaderboard-item'><strong>" + pb.text.escape_html(leaderboard[i].count) + "</strong> <a href='/user/" + parseInt(leaderboard[i].id, 10) + "'>" + pb.text.escape_html(html_decode(leaderboard[i].name)) + "</a></div>";
+			html += "<div class='scavenger-hunt-leaderboard-item'><span class=\"shlb-rank-" + (i+1) + "\">(" + (i+1) + ")</span> <a href='/user/" + parseInt(leaderboard[i].id, 10) + "'>" + pb.text.escape_html(html_decode(leaderboard[i].name)) + "</a> ( <strong>" + pb.text.escape_html(leaderboard[i].count) + "</strong> )</div>";
 		}
 	} else {
 		html += "Leaderboard is currently empty.";
@@ -103,6 +102,10 @@ $(document).ready(function() {
 	if(route && route.params && route.params.page_id == "scavenger-hunt"){
 		show_leaderboard();
 	}
+    
+    if(pb.plugin.get('scavenger_hunt').settings.sh_m_mode == 1) {
+        return;
+    }
 
 	if (userprizeBag === null) {
 		userprizeBag = 0
@@ -192,7 +195,7 @@ $(document).ready(function() {
 
 				pb.plugin.key('sh_obj_amount').increment({
 					object_id: userID,
-					value: incrementNum
+					value: parseInt(incrementNum) || 1
 				});
 			} else {
 				pb.plugin.key('sh_obj_amount').set({
